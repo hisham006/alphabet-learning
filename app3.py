@@ -12,13 +12,21 @@ import h5py
 def fix_model_config(path):
     with h5py.File(path, 'r+') as f:
         if 'model_config' in f.attrs:
-            model_config = json.loads(f.attrs['model_config'].decode('utf-8'))
+            model_config_data = f.attrs['model_config']
+            
+            # Handle both string and bytes cases
+            if isinstance(model_config_data, bytes):
+                model_config = json.loads(model_config_data.decode('utf-8'))
+            else:
+                model_config = json.loads(model_config_data)
+            
             # Traverse layers and remove 'batch_shape' in InputLayer config if exists
             for layer in model_config['config']['layers']:
                 if layer['class_name'] == 'InputLayer':
                     layer_config = layer['config']
                     if 'batch_shape' in layer_config:
                         del layer_config['batch_shape']
+            
             # Save back the fixed config
             f.attrs['model_config'] = json.dumps(model_config).encode('utf-8')
         else:
