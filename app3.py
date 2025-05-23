@@ -8,7 +8,7 @@ import tensorflow as tf
 import json
 import h5py
 
-# --- Fix model config to remove 'batch_shape' from InputLayer ---
+# --- Fix model config to handle compatibility issues ---
 def fix_model_config(path):
     with h5py.File(path, 'r+') as f:
         if 'model_config' in f.attrs:
@@ -20,17 +20,48 @@ def fix_model_config(path):
             else:
                 model_config = json.loads(model_config_data)
             
-            # Traverse layers and remove 'batch_shape' in InputLayer config if exists
+            # Fix various compatibility issues
             for layer in model_config['config']['layers']:
-                if layer['class_name'] == 'InputLayer':
-                    layer_config = layer['config']
-                    if 'batch_shape' in layer_config:
-                        del layer_config['batch_shape']
+                layer_config = layer['config']
+                
+                # Remove batch_shape from InputLayer
+                if layer['class_name'] == 'InputLayer' and 'batch_shape' in layer_config:
+                    del layer_config['batch_shape']
+                
+                # Fix dtype policy issues
+                if 'dtype' in layer_config:
+                    if isinstance(layer_config['dtype'], dict):
+                        if layer_config['dtype'].get('class_name') == 'DTypePolicy':
+                            # Replace with simple string dtype
+                            dtype_name = layer_config['dtype']['config'].get('name', 'float32')
+                            layer_config['dtype'] = dtype_name
             
             # Save back the fixed config
             f.attrs['model_config'] = json.dumps(model_config).encode('utf-8')
         else:
             print("No model_config attribute found in file.")
+
+# --- Load model with custom objects ---
+def load_model_safely(model_path):
+    try:
+        # First try to fix the config
+        fix_model_config(model_path)
+        
+        # Try loading with custom object scope
+        with tf.keras.utils.custom_object_scope({}):
+            model = tf.keras.models.load_model(model_path, compile=False)
+        return model
+    except Exception as e:
+        st.error(f"Error loading model: {str(e)}")
+        # Create a simple fallback model for demonstration
+        model = tf.keras.Sequential([
+            tf.keras.layers.Input(shape=(28, 28, 1)),
+            tf.keras.layers.Flatten(),
+            tf.keras.layers.Dense(128, activation='relu'),
+            tf.keras.layers.Dense(26, activation='softmax')
+        ])
+        st.warning("Using fallback model. Please check your model file.")
+        return model
 
 # --- Preprocess the canvas image for EMNIST prediction ---
 def preprocess_image(image_data):
