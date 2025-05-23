@@ -5,4 +5,4 @@ numpy==1.23.5
 Pillow==9.0.0
 gTTS==2.2.3
 opencv-python-headless==4.7.0.72
-altair>=4.0.0
+altair==4.2.2
