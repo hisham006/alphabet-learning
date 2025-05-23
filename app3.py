@@ -8,6 +8,9 @@ import tensorflow as tf
 import json
 import h5py
 
+# --- Streamlit page config MUST be first ---
+st.set_page_config(page_title="Alphabet Learner", layout="centered")
+
 # --- Fix model config to handle compatibility issues ---
 def fix_model_config(path):
     with h5py.File(path, 'r+') as f:
@@ -50,9 +53,9 @@ def load_model_safely(model_path):
         # Try loading with custom object scope
         with tf.keras.utils.custom_object_scope({}):
             model = tf.keras.models.load_model(model_path, compile=False)
-        return model
+        return model, None
     except Exception as e:
-        st.error(f"Error loading model: {str(e)}")
+        error_msg = f"Error loading model: {str(e)}"
         # Create a simple fallback model for demonstration
         model = tf.keras.Sequential([
             tf.keras.layers.Input(shape=(28, 28, 1)),
@@ -60,8 +63,7 @@ def load_model_safely(model_path):
             tf.keras.layers.Dense(128, activation='relu'),
             tf.keras.layers.Dense(26, activation='softmax')
         ])
-        st.warning("Using fallback model. Please check your model file.")
-        return model
+        return model, error_msg
 
 # --- Preprocess the canvas image for EMNIST prediction ---
 def preprocess_image(image_data):
@@ -146,10 +148,14 @@ example_words = {
 
 # --- Load model safely ---
 model_path = "emnist_letters_finetuned.h5"
-model = load_model_safely(model_path)
+model, error_msg = load_model_safely(model_path)
 
-# --- Streamlit page config ---
-st.set_page_config(page_title="Alphabet Learner", layout="centered")
+# --- Display any model loading errors/warnings ---
+if error_msg:
+    st.error(error_msg)
+    st.warning("Using fallback model. Please check your model file.")
+
+# --- App UI ---
 st.markdown("<h1 style='text-align: center;'>✍️ Alphabet Learning App</h1>", unsafe_allow_html=True)
 st.markdown(
     "<p style='text-align: center;'>Draw a lowercase letter (a-z) SLOWLY, click <b>Reveal</b>, then hear how it sounds and see words starting with it!</p>",
