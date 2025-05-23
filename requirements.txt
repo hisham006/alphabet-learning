@@ -1,3 +1,10 @@
+# Only install tensorflow if python version is less than 3.13
+tensorflow==2.12.0; python_version < "3.13"
+
+streamlit
+numpy
+pandas
+# add other dependencies you need here
 streamlit>=1.18.1
 streamlit-drawable-canvas>=0.9.1
 tensorflow==2.12.0
