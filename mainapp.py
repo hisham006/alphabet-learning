@@ -1,4 +1,4 @@
-
+import cv2
 import streamlit as st
 from streamlit_drawable_canvas import st_canvas
 from PIL import Image
