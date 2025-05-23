@@ -86,7 +86,7 @@ example_words = {
 }
 
 # --- Load model ---
-model = load_model("model/emnist_letters_finetuned.keras", compile=False)
+model = load_model("emnist_letters_finetuned.keras", compile=False)
 
 # --- Page config ---
 st.set_page_config(page_title="Alphabet Learner", layout="centered")
