@@ -106,7 +106,7 @@ example_words = {
 }
 
 # --- Fix and load your model ---
-model_path = "emnist_letters_resaved.keras"
+model_path = "emnist_letters_finetuned.h5"
 fix_model_config(model_path)
 model = tf.keras.models.load_model(model_path, compile=False)
 
