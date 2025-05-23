@@ -1,3 +1,11 @@
+import tensorflow as tf
+import keras
+
+import streamlit as st
+st.write("TensorFlow version:", tf.__version__)
+st.write("Keras version:", keras.__version__)
+st.write("Keras from:", keras.__file__)
+
 import streamlit as st
 from streamlit_drawable_canvas import st_canvas
 from PIL import Image
