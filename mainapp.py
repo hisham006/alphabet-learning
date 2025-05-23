@@ -1,12 +1,11 @@
 import streamlit as st
 from streamlit_drawable_canvas import st_canvas
-from keras.models import load_model
 from PIL import Image
 import numpy as np
 from gtts import gTTS
 import tempfile
 import os
-from keras.models import load_model
+from tensorflow.keras.models import load_model
 # --- Speak function ---
 def preprocess_image(image_data):
     # Convert RGBA to RGB if necessary
